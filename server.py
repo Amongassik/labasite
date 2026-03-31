@@ -25,7 +25,6 @@ def load_json_data(json_filepath):
             data = json.load(f)
         if isinstance(data,dict):
             if 'new_record' in data:
-                total_records = data.get('total_records', 0)
                 new_record = data.get('new_record', {})
                 log(f"Новая запись: {new_record.get('product_name')}")
                 return [new_record]
