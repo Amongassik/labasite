@@ -1,0 +1,102 @@
+{% extends 'arm/base.html' %}
+{%  load custom_filters %}
+
+{% block title %}Отчет по заказам{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Отчет по заказам</h1>
+        <a href="{% url 'home' %}" class="btn btn-secondary">← На главную</a>
+    </div>
+    <div class="card-body">
+        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 16px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 1.2rem; font-weight: 600;">Всего заказов:</span>
+            <span style="font-size: 2rem; font-weight: 700;">{{ orders_data|length }}</span>
+        </div>
+        <div class="table-container">
+            <table class="table" id="orders-table">
+                <thead>
+                    <tr>
+                        <th>№ заказа</th>
+                        <th>Клиент</th>
+                        <th>Тип оплаты</th>
+                        <th>Товары</th>
+                        <th> </th>
+                        <th>Сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders_data %}
+                    <tr>
+                        <td class="text-center">
+                            <strong>{{ forloop.counter }}</strong>
+                        </td>
+                        <td>{{ order.client_name }}</td>
+                        <td>
+                            {% if order.payment_type_code == 'cash' %}
+                            <span class="badge badge-cash">Наличные</span>
+                            {% elif order.payment_type_code == 'noncash'%}
+                            <span class=" badge badge-noncash">Безнал</span>
+                            {% elif order.payment_type_code == 'credit'%}
+                            <span class="badge badge-credit">Кредит</span>
+                            {% elif order.payment_type_code == 'barter'%}
+                            <span class="badge badge-barter">Бартер</span>
+                            {% elif order.payment_type_code == 'offset'%}
+                            <span class="badge badge-offset">Взаимозачет</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <details>
+                                <summary class="items-summary">
+                                    {{ order.items_summary|truncatechars:40 }}
+                                </summary>
+                                <div class="items-details">
+                                    {% for item in order.items_list %}
+                                        <div class="item-row">
+                                            <span class="item-name">{{ item.name}}</span>
+                                            <span class="item-quantity">{{ item.quantity }}</span>
+                                            <span class="item-price">{{ item.price }}₽</span>
+                                            <span class="item-total">{{ item.line_total}}₽</span>
+                                        </div>
+                                    {% endfor %}
+                                    </div>
+                                </div>
+                            </details>
+                        </td>
+                        <td class="text-center">{{ order.item_count }}</td>
+                        <td class="text-right">
+                            <strong>{{ order.total_amount }}</strong>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-staty">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>Заказов пока нет</h3>
+                            <p>Создайте первый заказ</p>
+                            <a href ="{% url order_create %}" class="btn btn-success">+Создать заказ</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="order-stats">
+            <div class="stat-item">
+                <span>Всего заказов</span>
+                <strong>{{ orders_data|length }}</strong>
+            </div>
+            <div class="stat-item">
+                <span>Общая сумма:</span>
+                <strong>
+                    {{ total_sum }}₽
+                </strong>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="{% url 'home' %}" class="btn btn-secondary">← Назад</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

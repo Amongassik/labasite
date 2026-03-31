@@ -1,0 +1,156 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}База клиентов{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>База клиентов</h1>
+        <div style="margin-top: 10px;">
+            <a href="{% url 'client_create' %}" class="btn btn-success">
+                + Добавить клиента
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <input type="text" 
+               id="client-search" 
+               class="search-box" 
+               placeholder="Введите имя клиента для поиска..."
+               style="width: 100%; padding: 10px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 4px;">
+        
+        <div id="search-spinner" style="display: none; text-align: center; padding: 10px;">
+            Поиск...
+        </div>
+        
+        <table class="table" id="clients-table">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Общий счет</th>
+                    <th>Текущий счет</th>
+                    <th>Потолок кредита</th>
+                    <th>Текущий долг</th>
+                    <th>Остаток кредита</th>
+                    <th>Комментарий</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="clients-tbody">
+                {% for c in clients %}
+                <tr class="client-row" data-client-id="{{ c.id }}">
+                    <td class="client-name">{{ c.name }}</td>
+                    <td>{{ c.total_purchases|floatformat:2 }}</td>
+                    <td>{{ c.current_balance|floatformat:2 }}</td>
+                    <td>{{ c.credit_limit|floatformat:2 }}</td>
+                    <td>{{ c.current_debt|floatformat:2 }}</td>
+                    <td>{{ c.credit_remaining|floatformat:2 }}</td>
+                    <td>{{ c.comment|truncatechars:50 }}</td>
+                    <td>
+                        <a href="{% url 'client_edit' c.id %}" class="btn btn-primary btn-sm">Ред.</a>
+                        <a href="{% url 'client_delete' c.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить клиента {{ c.name }}?')">Удал.</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center;">Клиентов пока нет</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <p style="margin-top: 20px;">
+            <a href="{% url 'home' %}" class="btn btn-secondary">← На главную</a>
+        </p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('client-search');
+    const tbody = document.getElementById('clients-tbody');
+    const spinner = document.getElementById('search-spinner');
+    let timeoutId;
+    
+    const originalRows = [];
+    document.querySelectorAll('.client-row').forEach(row => {
+        originalRows.push(row.outerHTML);
+    });
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value.trim();
+        
+        if (query === '') {
+            tbody.innerHTML = originalRows.join('');
+            spinner.style.display = 'none';
+            return;
+        }
+        
+        if (query.length < 2) {
+            return;
+        }
+        
+        spinner.style.display = 'block';
+        
+        timeoutId = setTimeout(() => {
+            fetch(`/clients/search/ajax/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+                    
+                    if (data.success) {
+                        if (data.clients.length > 0) {
+                            let newRows = '';
+                            data.clients.forEach(client => {
+                                newRows += `
+                                    <tr class="client-row" data-client-id="${client.id}">
+                                        <td class="client-name">${client.name}</td>
+                                        <td>${client.total_purchases.toFixed(2)}</td>
+                                        <td>${client.current_balance.toFixed(2)}</td>
+                                        <td>${client.credit_limit.toFixed(2)}</td>
+                                        <td>${client.current_debt.toFixed(2)}</td>
+                                        <td>${client.credit_remainder.toFixed(2)}</td>
+                                        <td>${client.comment ? client.comment.substring(0, 50) + (client.comment.length > 50 ? '...' : '') : ''}</td>
+                                        <td>
+                                            <a href="/clients/${client.id}/edit/" class="btn btn-primary btn-sm">Ред.</a>
+                                            <a href="/clients/${client.id}/delete/" class="btn btn-danger btn-sm" onclick="return confirm('Удалить клиента ${client.name}?')">Удал.</a>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            tbody.innerHTML = newRows;
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">Ничего не найдено</td></tr>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    spinner.style.display = 'none';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Ошибка при поиске</td></tr>';
+                });
+        }, 300);
+    });
+});
+</script>
+
+<style>
+    .table td, .table th {
+        padding: 12px;
+        vertical-align: middle;
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+        margin: 0 2px;
+    }
+    
+    .search-box:focus {
+        outline: none;
+        border-color: #4CAF50 !important;
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+    }
+</style>
+{% endblock %}

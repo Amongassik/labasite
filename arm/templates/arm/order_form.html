@@ -1,0 +1,651 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}Новый заказ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Новый заказ</h1>
+    </div>
+    <div class="card-body">
+        {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" id="order-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="client-select">Клиент:</label>
+                <select name="client" id="client-select" class="form-control" required>
+                    <option value="">-- Выберите клиента --</option>
+                    {% for c in clients %}
+                    <option value="{{ c.id }}"
+                            data-credit-limit="{{ c.credit_limit }}"
+                            data-current-debt="{{ c.current_debt }}">
+                        {{ c.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Тип оплаты:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <label><input type="radio" name="payment_type" value="cash" checked onchange="toggleMode()"> Наличный</label>
+                    <label><input type="radio" name="payment_type" value="noncash" onchange="toggleMode()"> Безналичный</label>
+                    <label><input type="radio" name="payment_type" value="credit" onchange="toggleMode()"> Кредит</label>
+                    <label><input type="radio" name="payment_type" value="barter" onchange="toggleMode()"> Бартер</label>
+                    <label><input type="radio" name="payment_type" value="offset" onchange="toggleMode()"> Взаимозачет</label>
+                </div>
+            </div>
+
+            <div id="normal-mode">
+                <h3>Товары в заказе</h3>
+                <div class="table-container">
+                    <table class="table" id="order-items">
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th>Цена</th>
+                                <th>Остаток</th>
+                                <th>Количество</th>
+                                <th>Сумма</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-index="0">
+                                <td>
+                                    <select name="item-0-product" class="product-select form-control">
+                                        <option value="">-- Выберите товар --</option>
+                                        {% for p in products %}
+                                        <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_qty }}">
+                                            {{ p.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td><span class="price">0.00</span></td>
+                                <td><span class="stock">0.00</span></td>
+                                <td><input type="number" name="item-0-qty" class="qty form-control" min="0" step="0.01" value="0"></td>
+                                <td><span class="line-total">0.00</span></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" id="add-row-btn" class="btn btn-secondary">+ Добавить товар</button>
+            </div>
+
+            <div id="barter-mode" style="display: none;">
+                <div class="barter-section out-section">
+                    <h3 class="barter-title out-title">ОТДАВАЕМЫЕ ТОВАРЫ</h3>
+                    <div class="table-container">
+                        <table class="table" id="barter-out-items">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Цена</th>
+                                    <th>Остаток</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-index="0">
+                                    <td>
+                                        <select name="barter-out-0-product" class="barter-out-select form-control">
+                                            <option value="">-- Выберите товар --</option>
+                                            {% for p in products %}
+                                            <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_qty }}">
+                                                {{ p.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td><span class="price">0.00</span></td>
+                                    <td><span class="stock">0.00</span></td>
+                                    <td><input type="number" name="barter-out-0-qty" class="qty form-control" min="0" step="0.01" value="0"></td>
+                                    <td><span class="line-total">0.00</span></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="barter-footer">
+                        <button type="button" class="btn btn-out-danger" onclick="addBarterRow('out')">
+                            <span>➕</span> Добавить отдаваемый товар
+                        </button>
+                        <div class="barter-total out-total">
+                            <span>ИТОГО ОТДАЕМ:</span>
+                            <strong><span id="barter-out-total">0.00</span> ₽</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Разделитель -->
+                <div class="barter-divider">
+                    <span class="divider-text">↕ ОБМЕН ↕</span>
+                </div>
+
+                <div class="barter-section in-section">
+                    <h3 class="barter-title in-title">⬇ПОЛУЧАЕМЫЕ ТОВАРЫ</h3>
+                    <div class="table-container">
+                        <table class="table" id="barter-in-items">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Цена</th>
+                                    <th>Остаток</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-index="0">
+                                    <td>
+                                        <select name="barter-in-0-product" class="barter-in-select form-control">
+                                            <option value="">-- Выберите товар --</option>
+                                            {% for p in products %}
+                                            <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_qty }}">
+                                                {{ p.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td><span class="price">0.00</span></td>
+                                    <td><span class="stock">0.00</span></td>
+                                    <td><input type="number" name="barter-in-0-qty" class="qty form-control" min="0" step="0.01" value="0"></td>
+                                    <td><span class="line-total">0.00</span></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="barter-footer">
+                        <button type="button" class="btn btn-out-success" onclick="addBarterRow('in')">
+                            <span>➕</span> Добавить получаемый товар
+                        </button>
+                        <div class="barter-total in-total">
+                            <span>ИТОГО ПОЛУЧАЕМ:</span>
+                            <strong><span id="barter-in-total">0.00</span> ₽</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="barter-balance" class="barter-balance">
+                </div>
+            </div>
+
+            <div class="order-total">
+                <span>ИТОГО:</span>
+                <strong><span id="order-total">0.00</span> ₽</strong>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Создать заказ</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.barter-section {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s;
+}
+
+.barter-section.out-section {
+    border-left: 6px solid #dc2626;
+}
+
+.barter-section.in-section {
+    border-left: 6px solid #059669;
+}
+
+.barter-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.barter-title.out-title {
+    color: #dc2626;
+}
+
+.barter-title.in-title {
+    color: #059669;
+}
+
+.barter-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.barter-total {
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    background: #f8fafc;
+    border-radius: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.barter-total.out-total {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.barter-total.in-total {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.barter-total span {
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+.barter-total strong {
+    font-size: 1.2rem;
+}
+
+.barter-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.barter-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+    z-index: 1;
+}
+
+.divider-text {
+    position: relative;
+    z-index: 2;
+    background: white;
+    padding: 10px 30px;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 40px;
+    border: 2px solid #e2e8f0;
+    display: inline-block;
+}
+
+.barter-balance {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.btn-out-danger {
+    background: white;
+    border: 2px solid #dc2626;
+    color: #dc2626;
+}
+
+.btn-out-danger:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-out-success {
+    background: white;
+    border: 2px solid #059669;
+    color: #059669;
+}
+
+.btn-out-success:hover {
+    background: #059669;
+    color: white;
+}
+
+.order-total {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 16px;
+    text-align: center;
+    color: white;
+    font-size: 1.3rem;
+}
+
+.order-total span {
+    opacity: 0.9;
+    margin-right: 15px;
+}
+
+.order-total strong {
+    font-size: 1.8rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    justify-content: flex-end;
+}
+
+.form-actions .btn {
+    min-width: 150px;
+}
+
+@media (max-width: 768px) {
+    .barter-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .barter-total {
+        justify-content: center;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function toggleMode() {
+    const barterRadio = document.querySelector('input[value="barter"]');
+    const normalMode = document.getElementById('normal-mode');
+    const barterMode = document.getElementById('barter-mode');
+    
+    if (barterRadio.checked) {
+        normalMode.style.display = 'none';
+        barterMode.style.display = 'block';
+    } else {
+        normalMode.style.display = 'block';
+        barterMode.style.display = 'none';
+    }
+}
+
+function addNormalRow() {
+    const tbody = document.querySelector('#order-items tbody');
+    const rowCount = tbody.children.length;
+    const newRow = document.createElement('tr');
+    
+    newRow.innerHTML = `
+        <td>
+            <select name="item-${rowCount}-product" class="product-select form-control">
+                <option value="">-- Выберите товар --</option>
+                {% for p in products %}
+                <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_qty }}">
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><span class="price">0.00</span></td>
+        <td><span class="stock">0.00</span></td>
+        <td><input type="number" name="item-${rowCount}-qty" class="qty form-control" min="0" step="0.01" value="0"></td>
+        <td><span class="line-total">0.00</span></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); updateNormalTotal();">✕</button></td>
+    `;
+    
+    tbody.appendChild(newRow);
+    
+    newRow.querySelector('.product-select').addEventListener('change', function() { updateNormalRow(this); });
+    newRow.querySelector('.qty').addEventListener('input', function() { updateNormalRow(this.closest('tr').querySelector('.product-select')); });
+}
+
+function updateNormalRow(select) {
+    const row = select.closest('tr');
+    const priceSpan = row.querySelector('.price');
+    const stockSpan = row.querySelector('.stock');
+    const qtyInput = row.querySelector('.qty');
+    const lineTotalSpan = row.querySelector('.line-total');
+
+    const option = select.options[select.selectedIndex];
+    const price = parseFloat(option?.dataset?.price || 0);
+    const stock = parseFloat(option?.dataset?.stock || 0);
+    const qty = parseFloat(qtyInput.value || 0);
+
+    priceSpan.textContent = price.toFixed(2);
+    stockSpan.textContent = stock.toFixed(2);
+
+    const lineTotal = price * qty;
+    lineTotalSpan.textContent = lineTotal.toFixed(2);
+
+    stockSpan.classList.remove('stock-ok', 'stock-bad');
+    if (qty > 0) {
+        if (qty <= stock) {
+            stockSpan.classList.add('stock-ok');
+        } else {
+            stockSpan.classList.add('stock-bad');
+            const beep = document.getElementById('beep');
+            if (beep) beep.play().catch(e => console.log('Audio error:', e));
+        }
+    }
+
+    updateNormalTotal();
+}
+
+function updateNormalTotal() {
+    let total = 0;
+    document.querySelectorAll('#order-items .line-total').forEach(span => {
+        total += parseFloat(span.textContent || 0);
+    });
+    document.getElementById('order-total').textContent = total.toFixed(2);
+}
+
+function addBarterRow(type) {
+    const tableId = type === 'out' ? 'barter-out-items' : 'barter-in-items';
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    const rowCount = tbody.children.length;
+    const newRow = document.createElement('tr');
+    
+    const prefix = type === 'out' ? 'barter-out' : 'barter-in';
+    const selectClass = type === 'out' ? 'barter-out-select' : 'barter-in-select';
+    
+    newRow.innerHTML = `
+        <td>
+            <select name="${prefix}-${rowCount}-product" class="${selectClass} form-control">
+                <option value="">-- Выберите товар --</option>
+                {% for p in products %}
+                <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_qty }}">
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><span class="price">0.00</span></td>
+        <td><span class="stock">0.00</span></td>
+        <td><input type="number" name="${prefix}-${rowCount}-qty" class="qty form-control" min="0" step="0.01" value="0"></td>
+        <td><span class="line-total">0.00</span></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); updateBarterTotals();">✕</button></td>
+    `;
+    
+    tbody.appendChild(newRow);
+    
+    newRow.querySelector('select').addEventListener('change', function() { updateBarterRow(this); });
+    newRow.querySelector('.qty').addEventListener('input', function() { updateBarterRow(this.closest('tr').querySelector('select')); });
+}
+
+function updateBarterRow(select) {
+    const row = select.closest('tr');
+    const priceSpan = row.querySelector('.price');
+    const stockSpan = row.querySelector('.stock');
+    const qtyInput = row.querySelector('.qty');
+    const lineTotalSpan = row.querySelector('.line-total');
+
+    const option = select.options[select.selectedIndex];
+    const price = parseFloat(option?.dataset?.price || 0);
+    const stock = parseFloat(option?.dataset?.stock || 0);
+    const qty = parseFloat(qtyInput.value || 0);
+
+    priceSpan.textContent = price.toFixed(2);
+    stockSpan.textContent = stock.toFixed(2);
+
+    const lineTotal = price * qty;
+    lineTotalSpan.textContent = lineTotal.toFixed(2);
+
+    stockSpan.classList.remove('stock-ok', 'stock-bad');
+    if (qty > 0) {
+        if (select.classList.contains('barter-out-select')) {
+            if (qty <= stock) {
+                stockSpan.classList.add('stock-ok');
+            } else {
+                stockSpan.classList.add('stock-bad');
+                const beep = document.getElementById('beep');
+                if (beep) beep.play().catch(e => console.log('Audio error:', e));
+            }
+        }
+    }
+
+    updateBarterTotals();
+}
+
+function updateBarterTotals() {
+    let outTotal = 0;
+    let inTotal = 0;
+    
+    document.querySelectorAll('#barter-out-items tbody tr').forEach(row => {
+        outTotal += parseFloat(row.querySelector('.line-total').textContent || 0);
+    });
+    
+    document.querySelectorAll('#barter-in-items tbody tr').forEach(row => {
+        inTotal += parseFloat(row.querySelector('.line-total').textContent || 0);
+    });
+    
+    document.getElementById('barter-out-total').textContent = outTotal.toFixed(2);
+    document.getElementById('barter-in-total').textContent = inTotal.toFixed(2);
+    
+    document.getElementById('order-total').textContent = inTotal.toFixed(2);
+    
+    const balanceDiv = document.getElementById('barter-balance');
+    const diff = outTotal - inTotal;
+    
+    if (outTotal === 0 && inTotal === 0) {
+        balanceDiv.innerHTML = 'Добавьте товары для обмена';
+        balanceDiv.style.background = '#f1f5f9';
+        balanceDiv.style.color = '#475569';
+        balanceDiv.style.borderColor = '#cbd5e1';
+    } else if (Math.abs(diff) < 0.01) {
+        balanceDiv.innerHTML = 'БАЛАНС СОШЕЛСЯ';
+        balanceDiv.style.background = '#d1fae5';
+        balanceDiv.style.color = '#065f46';
+        balanceDiv.style.borderColor = '#10b981';
+    } else if (diff > 0) {
+        const percent = ((diff / outTotal) * 100).toFixed(1);
+        balanceDiv.innerHTML = `ПЕРЕПЛАТА: ${diff.toFixed(2)} ₽ (отдаете больше на ${percent}%)`;
+        balanceDiv.style.background = '#fed7aa';
+        balanceDiv.style.color = '#92400e';
+        balanceDiv.style.borderColor = '#f59e0b';
+    } else {
+        const percent = ((Math.abs(diff) / inTotal) * 100).toFixed(1);
+        balanceDiv.innerHTML = `НЕДОПЛАТА: ${Math.abs(diff).toFixed(2)} ₽ (получаете больше на ${percent}%)`;
+        balanceDiv.style.background = '#fed7aa';
+        balanceDiv.style.color = '#92400e';
+        balanceDiv.style.borderColor = '#f59e0b';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#order-items .product-select').forEach(select => {
+        select.addEventListener('change', function() { updateNormalRow(this); });
+    });
+    document.querySelectorAll('#order-items .qty').forEach(input => {
+        input.addEventListener('input', function() { updateNormalRow(this.closest('tr').querySelector('.product-select')); });
+    });
+    
+    document.querySelectorAll('.barter-out-select, .barter-in-select').forEach(select => {
+        select.addEventListener('change', function() { updateBarterRow(this); });
+    });
+    document.querySelectorAll('#barter-out-items .qty, #barter-in-items .qty').forEach(input => {
+        input.addEventListener('input', function() { updateBarterRow(this.closest('tr').querySelector('select')); });
+    });
+    
+    document.getElementById('add-row-btn').addEventListener('click', addNormalRow);
+    
+    toggleMode();
+});
+
+document.getElementById('order-form').addEventListener('submit', function(e) {
+    const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+    
+    if (paymentType === 'barter') {
+        let hasOutItems = false;
+        let hasInItems = false;
+        
+        document.querySelectorAll('#barter-out-items tbody tr').forEach(row => {
+            const select = row.querySelector('select');
+            const qty = parseFloat(row.querySelector('.qty').value || 0);
+            if (select.value && qty > 0) {
+                hasOutItems = true;
+            }
+        });
+        
+        document.querySelectorAll('#barter-in-items tbody tr').forEach(row => {
+            const select = row.querySelector('select');
+            const qty = parseFloat(row.querySelector('.qty').value || 0);
+            if (select.value && qty > 0) {
+                hasInItems = true;
+            }
+        });
+        
+        const outTotal = parseFloat(document.getElementById('barter-out-total').textContent);
+        const inTotal = parseFloat(document.getElementById('barter-in-total').textContent);
+        
+        if (!hasOutItems || !hasInItems) {
+            e.preventDefault();
+            alert('Для бартера нужно указать как отдаваемые, так и получаемые товары');
+        } else if (Math.abs(outTotal - inTotal) > 0.01) {
+            e.preventDefault();
+            alert('Суммы отдаваемых и получаемых товаров должны быть равны');
+        }
+    } else {
+        let hasItems = false;
+        document.querySelectorAll('#order-items tbody tr').forEach(row => {
+            const select = row.querySelector('.product-select');
+            const qty = parseFloat(row.querySelector('.qty').value || 0);
+            if (select.value && qty > 0) {
+                hasItems = true;
+            }
+        });
+        
+        if (!hasItems) {
+            e.preventDefault();
+            alert('Добавьте хотя бы один товар в заказ');
+        }
+    }
+});
+</script>
+
+{% endblock %}

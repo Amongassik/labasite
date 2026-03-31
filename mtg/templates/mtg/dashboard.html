@@ -1,0 +1,137 @@
+{% extends 'mtg/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="current-value">
+        <h2>Текущее значение: <span id="current">{{ current_value }}</span></h2>
+        <div class="range-info">
+            Допустимый диапазон: [{{ min_value }}, {{ max_value }}]
+        </div>
+    </div>
+    <div class="stats">
+        Всего записей: <strong>{{ total_count }}</strong>
+    </div>
+    
+    <!-- Панель фильтрации -->
+    <div class="filter-panel">
+        <h3>Фильтрация данных</h3>
+        <div class="filter-controls">
+            <select id="filterType" class="filter-select">
+                <option value="greater" {% if last_filter.type == 'greater' %}selected{% endif %}>
+                    Больше заданной границы
+                </option>
+                <option value="less" {% if last_filter.type == 'less' %}selected{% endif %}>
+                    Меньше заданной границы
+                </option>
+                <option value="multiple" {% if last_filter.type == 'multiple' %}selected{% endif %}>
+                    Кратно определенному значению
+                </option>
+            </select>
+            <input type="number" id="filterValue" class="filter-input" 
+                   placeholder="Введите значение" step="any"
+                   value="{{ last_filter.value|default:'' }}">
+            <button id="applyFilterBtn" class="btn btn-primary">Применить фильтр</button>
+            <button id="resetFilterBtn" class="btn btn-secondary">Сбросить</button>
+        </div>
+        <div id="filterInfo" class="filter-info"></div>
+    </div>
+    
+    <div class="history">
+        <div class="history-header">
+            <h3>Последние {{ n1 }} значений:</h3>        
+            <button id="clearDataBtn" class="btn btn-danger">Очистить данные</button>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Время</th>
+                    <th>Значение</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in history %}
+                <tr class="alert-{{ data.alert_type }}">
+                    <td>{{ data.timestamp|time:"H:i:s" }}</td>
+                    <td>{{ data.value }}</td>
+                    <td>
+                        {% if data.alert_type == 'danger' %}
+                            Тревога
+                        {% elif data.alert_type == 'warning' %}
+                            Предупреждение
+                        {% else %}
+                            Норма
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="chart">
+        <h3>График изменений (все данные):</h3>
+        <canvas id="sensorChart" width="800" height="400"></canvas>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(75, 192, 192);"></div>
+                <span>Норма</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(255, 159, 64);"></div>
+                <span>Предупреждение (изменение > {{ n2 }}%)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(255, 99, 132);"></div>
+                <span>Тревога (вне диапазона [{{ min_value }}, {{ max_value }}])</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Блок для выборочных данных -->
+    <div id="filteredDataSection" class="filtered-data-section" 
+         style="display: {% if filtered_data != 'null' %}block{% else %}none{% endif %};">
+        <div class="chart">
+            <h3>График выборочных значений:</h3>
+            <canvas id="filteredChart" width="800" height="400"></canvas>
+            <div id="averageInfo" class="average-info"></div>
+        </div>
+        
+        <div class="chart">
+            <h3>Диаграмма выборочных значений:</h3>
+            <canvas id="barChart" width="800" height="400"></canvas>
+        </div>
+    </div>
+    
+    <div class="alerts">
+        {% if alert %}
+        <div class="alert {{ alert.type }}">
+            {{ alert.message }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Передаем данные через data-атрибут -->
+<div id="chart-data" 
+     data-chart-values='{{ chart_values|safe }}'
+     data-chart-timestamps='{{ chart_timestamps|safe }}'
+     data-chart-colors='{{ chart_colors|safe }}'
+     style="display: none;">
+</div>
+
+<!-- Передаем сохраненные данные фильтрации -->
+<div id="saved-filter-data" 
+     data-filtered-data='{{ filtered_data|safe }}'
+     style="display: none;">
+</div>
+
+<script>
+    const clearUrl = "{% url 'clear_data' %}";
+    const filterUrl = "{% url 'filter_data' %}";
+    const clearFilterUrl = "{% url 'clear_filter' %}";
+</script>
+<script src="{% static 'mtg/js/scripts.js' %}"></script>
+{% endblock %}

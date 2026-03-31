@@ -1,0 +1,26 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}Подтверждение удаления{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div class="card-header">
+        <h1>Подтверждение удаления</h1>
+    </div>
+    <div class="card-body">
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Вы уверены, что хотите удалить 
+            <strong>{% if client %}{{ client.name }}{% else %}{{ product.name }}{% endif %}</strong>?
+        </p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-danger">Да, удалить</button>
+                <a href="{% if client %}{% url 'clients_list' %}{% else %}{% url 'products_list' %}{% endif %}" 
+                   class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

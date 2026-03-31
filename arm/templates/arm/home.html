@@ -1,0 +1,30 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}Главная - АРМ Оператора{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>АРМ оператора продаж</h1>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+            <a href="{% url 'clients_list' %}" class="btn btn-primary" style="padding: 15px 30px; font-size: 18px;">
+                База клиентов
+            </a>
+            <a href="{% url 'products_list' %}" class="btn btn-success" style="padding: 15px 30px; font-size: 18px;">
+                База товаров
+            </a>
+            <a href="{% url 'order_create' %}" class="btn btn-warning" style="padding: 15px 30px; font-size: 18px;">
+                Новый заказ
+            </a>
+            <a href="{% url 'clients_orders_report' %}" class="btn btn-secondary" style="padding: 15px 30px; font-size: 18px;">
+                Отчеты по клиентам
+            </a>
+            <a href="{% url 'order_report' %}" class="btn btn-secondary" style="padding: 15px 30px; font-size: 18px;">
+                Отчеты по заказам
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

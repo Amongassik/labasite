@@ -1,0 +1,35 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}{% if product %}Редактировать товар{% else %}Добавить товар{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>{% if product %}Редактировать товар{% else %}Добавить новый товар{% endif %}</h1>
+    </div>
+    <div class="card-body">
+        <form method="post" style="max-width: 600px;">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: #e74c3c; font-size: 12px; margin-top: 5px;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-success">
+                    {% if product %}Сохранить{% else %}Добавить{% endif %}
+                </button>
+                <a href="{% url 'products_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

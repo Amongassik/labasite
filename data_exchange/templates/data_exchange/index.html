@@ -1,0 +1,61 @@
+{% extends 'data_exchange/base.html' %}
+
+{% block content %}
+<h2>Ввод данных о продажах</h2>
+<div class="form-card">
+    <h3>Добавить товар</h3>
+    <form action="{% url 'data_exchange:index' %}" method="post">
+        {% csrf_token %}
+
+        {% for f in form %}
+        <div class="form-group">
+            <label for="{{ f.id_for_label }}">{{f.label}}</label>
+            {{f}}
+        </div>
+        <div class="form-error">{{f.errors}}</div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Добавить товар</button>
+    </form>
+</div>
+
+<div class="button-group">
+    <form action="{% url 'data_exchange:index' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="clear_data" value="1">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены?')">Очистить все</button>
+    </form>
+</div>
+
+<h3>Список добавленных товаров ({{ total_count }})</h3>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Наименование</th>
+                <th>Группа</th>
+                <th>Количество</th>
+                <th>Цена продажи</th>
+                <th>Цена закупки</th>
+                <th>Скидка</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sales_data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.product_group }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.sale_price|floatformat:2 }} ₽</td>
+                    <td>{{ item.purchase_price|floatformat:2 }} ₽</td>
+                    <td>{{ item.discount|floatformat:2 }}%</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="stats">
+    Всего товаров: {{ total_count }}
+</div>
+{% endblock %}

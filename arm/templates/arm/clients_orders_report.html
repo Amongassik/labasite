@@ -1,0 +1,41 @@
+{% extends 'arm/base.html' %}
+
+{% block title %}Отчет по клиентам{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Клиенты и их заказы</h1>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Имя клиента</th>
+                    <th>Сумма всех заказов</th>
+                    <th>Количество заказов</th>
+                    <th>Товары</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in clients_data %}
+                <tr>
+                    <td>{{ row.client.name }}</td>
+                    <td>{{ row.total_orders_sum|floatformat:2 }} ₽</td>
+                    <td style="text-align: center;">{{ row.orders_count }}</td>
+                    <td>{{ row.product_names|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center;">Клиентов нет</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <p style="margin-top: 20px;">
+            <a href="{% url 'home' %}" class="btn btn-secondary">← На главную</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
