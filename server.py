@@ -61,7 +61,7 @@ def get_total_records(json_filepath):
 def calculate_profit(sales_data):
     profit_by_group = {}
     
-    for sale in sales_data:  # ✅ проходим по списку
+    for sale in sales_data: 
         group = sale.get('product_group', 'Без группы')
         quantity = sale.get('quantity', 0)
         sale_price = sale.get('sale_price', 0)
