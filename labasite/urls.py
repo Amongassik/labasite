@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('arm.urls')),
     path('mtg/',include('mtg.urls')),
-    path('data_change/',include('data_exchange.urls'))
+    path('data_change/',include('data_exchange.urls')),
+    path('dist/',include('dist.urls'))
 ]

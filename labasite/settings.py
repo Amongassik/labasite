@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'arm.apps.ArmConfig',
     'mtg.apps.MtgConfig',
-    'data_exchange.apps.DataExchangeConfig'
+    'data_exchange.apps.DataExchangeConfig',
+    'dist.apps.DistConfig'
 ]
 
 MIDDLEWARE = [
