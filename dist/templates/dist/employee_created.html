@@ -1,0 +1,22 @@
+{% extends "dist/base.html" %}
+
+{% block content %}
+    <div>
+        <h2>Информация о сотруднике</h2>
+        <p><strong>ФИО:</strong> {{ employee.full_name }}</p>
+        <p><strong>Должность:</strong> {{ employee.get_position_display }}</p>
+        <p><strong>Телефон:</strong> {{ employee.phone }}</p>
+        <p><strong>Адрес:</strong> {{ employee.address }}</p>
+    </div>
+    
+    <div>
+        <h2>Учетные данные для входа</h2>
+        <p><strong>Логин:</strong> {{ login }}</p>
+        <p><strong>Пароль:</strong> {{ password }}</p>
+        <p>Сохраните эти данные! Пароль будет отображаться только один раз.</p>
+    </div>
+    
+    <div>
+        <a href="{% url 'index' %}" class="btn">Вернуться к списку сотрудников</a>
+    </div>
+{% endblock %}

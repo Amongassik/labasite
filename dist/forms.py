@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.hashers import check_password
-from .models import Emploees,Logins
+from .models import Emploees, Logins
 import random
 
 class LoginForm(forms.Form):
@@ -34,8 +34,10 @@ class LoginForm(forms.Form):
             except Logins.DoesNotExist:
                 raise forms.ValidationError('Пользователь с таким логином не найден')
         return cleaned_data
-    
+
+
 class EmployeeForm(forms.ModelForm):
+    create_account = True
     
     class Meta:
         model = Emploees
@@ -73,7 +75,9 @@ class EmployeeForm(forms.ModelForm):
                 'placeholder': 'Введите телефон'
             }),
         }
+    
     def __init__(self, *args, **kwargs):
+        self.create_account = kwargs.pop('create_account', True)
         super().__init__(*args, **kwargs)
         self.fields['patronymic'].required = False
         
@@ -87,43 +91,48 @@ class EmployeeForm(forms.ModelForm):
             'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
         }
 
-        def transliterate(text:str):
+        def transliterate(text: str):
             text = text.lower()
             result = ''
             for char in text:
                 if char in translit_dict:
-                    result+=translit_dict[char]
+                    result += translit_dict[char]
                 elif char.isalpha():
-                    result+=char
+                    result += char
                 else:
-                    result+=''
+                    result += ''
             return result
+            
         last_translit = transliterate(last_name)
-        first_translit =transliterate(first_name)
+        first_translit = transliterate(first_name)
 
-        login = f"{last_translit}{first_translit}"
-        orig_login = login
+        login = f"{last_translit}_{first_translit}"
+        original_login = login
         counter = 1
+        
         while Logins.objects.filter(login=login).exists():
-            login = f"{orig_login}{counter}"
-            counter+=1
+            login = f"{original_login}{counter}"
+            counter += 1
+            
         return login
     
     @staticmethod
     def generate_password():
-        return f"{random.randint(1000,9999)}"
+        return f"{random.randint(1000, 9999)}"
     
-    def save(self,commit=True):
+    def save(self, commit=True):
         employee = super().save(commit=commit)
         login = None
         password = None
-        if commit:
+        
+        if commit and self.create_account:
             login = self.generate_login(employee.last_name, employee.first_name)
             password = self.generate_password()
             user_account = Logins(
-                employee = employee,
-                login = login
+                employee=employee,
+                login=login
             )
             user_account.set_password(password)
             user_account.save()
-        return employee,login,password
+        
+        return employee, login, password

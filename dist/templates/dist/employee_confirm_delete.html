@@ -1,0 +1,37 @@
+{% extends "dist/base.html" %}
+
+{% block mainmenu %}
+<h1>{{ title }}</h1>
+{% endblock %}
+
+{% block content %}
+    {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div>
+        <p>Внимание! Это действие нельзя отменить.</p>
+        
+        <div>
+            <h3>Информация о сотруднике:</h3>
+            <p><strong>ФИО:</strong> {{ employee.full_name }}</p>
+            <p><strong>Должность:</strong> {{ employee.get_position_display }}</p>
+            <p><strong>Телефон:</strong> {{ employee.phone }}</p>
+            <p><strong>Адрес:</strong> {{ employee.address }}</p>
+        </div>
+        
+        <p>Вы уверены, что хотите удалить этого сотрудника?</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                <button type="submit">Да, удалить</button>
+                <a href="{% url 'index' %}" class="btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

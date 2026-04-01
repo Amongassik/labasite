@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'dist/css/style.css' %}">
+    <link type="text/css"  href="{% static 'dist/css/style.css' %}" rel="stylesheet"/>    
     <title>{{ title }}</title>
 </head>
 <body>
@@ -15,5 +15,4 @@
 {% block content %}
 {% endblock %}
 </body>
-<script src="{% static 'dist/js/scripts.js' %}"></script>
 </html>

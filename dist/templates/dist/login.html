@@ -1,5 +1,51 @@
-{% extends 'dist/base.html' %}
+{% extends "dist/base.html" %}
 
 {% block content %}
-
+    {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% if form.non_field_errors %}
+        <div>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div>
+            <label for="{{ form.login.id_for_label }}">Логин:</label>
+            {{ form.login }}
+            {% if form.login.errors %}
+                <div>
+                    {% for error in form.login.errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.password.id_for_label }}">Пароль:</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div>
+                    {% for error in form.password.errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div>
+            <button type="submit">Войти</button>
+        </div>
+    </form>
 {% endblock %}

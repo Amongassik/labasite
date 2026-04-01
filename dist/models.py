@@ -19,6 +19,9 @@ class Emploees(models.Model):
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
 
+    @property
+    def full_name(self):
+        return f'{self.last_name} {self.first_name} {self.patronymic}'.strip()
 class Logins(models.Model):
     employee = models.OneToOneField(
         Emploees,
