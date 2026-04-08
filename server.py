@@ -5,10 +5,9 @@ import sys
 import json
 import os
 import win32com.client as win32
-import datetime
-import config
+from config import EXCEL_PATH,LOG_FILE
 
-LOG_FILE = "server_log.txt"
+import datetime
 
 def log(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -189,7 +188,7 @@ def main():
         return
     
     json_file_path = sys.argv[1]
-    excel_path = config.EXCEL_PATH
+    excel_path = EXCEL_PATH
 
     log(f"📁 JSON: {json_file_path}")
     log(f"📊 Excel: {excel_path}")
