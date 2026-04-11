@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'arm.apps.ArmConfig',
     'mtg.apps.MtgConfig',
     'data_exchange.apps.DataExchangeConfig',
-    'dist.apps.DistConfig'
+    'dist.apps.DistConfig',
+    'contract.apps.ContractConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,44 @@
+[2026-04-11 12:22:08] server работает
+[2026-04-11 12:22:08] 📁 JSON: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_0f26551647eb44238e0f76331f900836.json
+[2026-04-11 12:22:08] 📊 Excel: C:\\Users\\Daniil\\OneDrive\\Desktop\\ISLaba\\site\\labasite\\chart.xlsx
+[2026-04-11 12:22:08] Новая запись: Попыт
+[2026-04-11 12:22:08] 💰 Прибыль по группам:
+[2026-04-11 12:22:08]    Аксессуары: 13500.00 руб.
+[2026-04-11 12:22:08] 🔌 Подключение к Excel...
+[2026-04-11 12:22:10] 📝 Обработка группы: Аксессуары, прибыль: 13500.00
+[2026-04-11 12:22:10]    ✅ Обновлено: Аксессуары = 27000.00 (было 13500.00)
+[2026-04-11 12:22:10] ✅ Excel обновлен!
+[2026-04-11 12:22:10] 🔌 Подключение к Excel...
+[2026-04-11 12:22:11] ✅ Excel обновлен! Добавлено 1 записей
+[2026-04-11 12:22:11] 🗑️ Удален временный файл: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_0f26551647eb44238e0f76331f900836.json
+[2026-04-11 12:22:11] server завершил работу
+
+[2026-04-11 13:01:10] server работает
+[2026-04-11 13:01:10] 📁 JSON: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_empty_60862bfbb8354ff5b17d0193a54b7e07.json
+[2026-04-11 13:01:10] 📊 Excel: C:\\Users\\Daniil\\OneDrive\\Desktop\\ISLaba\\site\\labasite\\chart.xlsx
+[2026-04-11 13:01:10] 🗑️ Очищаем Excel (данных нет)
+[2026-04-11 13:01:10] 🔌 Подключение к Excel...
+[2026-04-11 13:01:12] ✅ Excel очищен!
+[2026-04-11 13:01:12] 🗑️ Удален пустой файл: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_empty_60862bfbb8354ff5b17d0193a54b7e07.json
+[2026-04-11 13:01:18] server работает
+[2026-04-11 13:01:18] 📁 JSON: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_016cf49c483a4bbd9b9ecbd967ce8fbc.json
+[2026-04-11 13:01:18] 📊 Excel: C:\\Users\\Daniil\\OneDrive\\Desktop\\ISLaba\\site\\labasite\\chart.xlsx
+[2026-04-11 13:01:18] Новая запись: Попыт
+[2026-04-11 13:01:18] 💰 Прибыль по группам:
+[2026-04-11 13:01:18]    Аксессуары: 13500.00 руб.
+[2026-04-11 13:01:18] 🔌 Подключение к Excel...
+[2026-04-11 13:01:18] 📝 Обработка группы: Аксессуары, прибыль: 13500.00
+[2026-04-11 13:01:18]    ✅ Обновлено: Аксессуары = 13500.00 (было 0.00)
+[2026-04-11 13:01:18] ✅ Excel обновлен!
+[2026-04-11 13:01:18] 🔌 Подключение к Excel...
+[2026-04-11 13:01:18] ✅ Excel обновлен! Добавлено 1 записей
+[2026-04-11 13:01:18] 🗑️ Удален временный файл: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_016cf49c483a4bbd9b9ecbd967ce8fbc.json
+[2026-04-11 13:01:18] server завершил работу
+
+[2026-04-11 13:03:41] server работает
+[2026-04-11 13:03:41] 📁 JSON: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_empty_71fc54cd9fe746b08c8f94c5b331c8b3.json
+[2026-04-11 13:03:41] 📊 Excel: C:\\Users\\Daniil\\OneDrive\\Desktop\\ISLaba\\site\\labasite\\chart.xlsx
+[2026-04-11 13:03:41] 🗑️ Очищаем Excel (данных нет)
+[2026-04-11 13:03:41] 🔌 Подключение к Excel...
+[2026-04-11 13:03:41] ✅ Excel очищен!
+[2026-04-11 13:03:41] 🗑️ Удален пустой файл: C:\Users\Daniil\OneDrive\Desktop\ISLaba\site\labasite\exports\temp_empty_71fc54cd9fe746b08c8f94c5b331c8b3.json

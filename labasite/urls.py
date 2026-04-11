@@ -22,5 +22,6 @@ urlpatterns = [
     path('',include('arm.urls')),
     path('mtg/',include('mtg.urls')),
     path('data_change/',include('data_exchange.urls')),
-    path('dist/',include('dist.urls'))
+    path('dist/',include('dist.urls')),
+    path('contract/',include('contract.urls'))
 ]
