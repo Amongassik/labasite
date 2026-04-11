@@ -21,10 +21,10 @@
         {% for emp in employees %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ emp.employee_name }}</td>
+            <td>{{ emp.name }}</td>
             <td>{{ emp.accrued_amount|floatformat:2 }}</td>
             <td>
-                <a href="{% url 'delete' emp.id %}" class="btn-delete" onclick="return confirm('Удалить {{ emp.employee_name }}?')">🗑️ Удалить</a>
+                <a href="{% url 'delete' emp.id %}" class="btn-delete" onclick="return confirm('Удалить {{ emp.name }}?')">🗑️ Удалить</a>
             </td>
         </tr>
         {% empty %}
