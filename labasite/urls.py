@@ -23,5 +23,6 @@ urlpatterns = [
     path('mtg/',include('mtg.urls')),
     path('data_change/',include('data_exchange.urls')),
     path('dist/',include('dist.urls')),
-    path('contract/',include('contract.urls'))
+    path('contract/',include('contract.urls')),
+    path('payroll/',include('payroll.urls')),
 ]

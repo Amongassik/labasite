@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'data_exchange.apps.DataExchangeConfig',
     'dist.apps.DistConfig',
     'contract.apps.ContractConfig',
+    'payroll.apps.PayrollConfig',
 ]
 
 MIDDLEWARE = [
