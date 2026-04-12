@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'mtg.apps.MtgConfig',
     'data_exchange.apps.DataExchangeConfig',
     'dist.apps.DistConfig',
-    'contract.apps.ContractConfig',
-    'payroll.apps.PayrollConfig',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +126,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT=os.path.join(BASE_DIR,'static')
-STATICFILES_DIRS = []
+
 
 EXPORTS_DIR = BASE_DIR/'exports/'
